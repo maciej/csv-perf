@@ -1,0 +1,12 @@
+src/test/resources/orig
+src/test/resources/ratings-10M.csv
+target
+
+# IDEA
+*.ipr
+*.iml
+*.iws
+.idea
+
+# Standard
+*~
