@@ -41,6 +41,12 @@ object ScalaMeterPerfTest extends PerformanceTest.Quickbenchmark {
     }
   }
 
+  performance of "Simple CSV parser" in {
+    using(smallFiles) in { data =>
+      new SimpleParserRun(data).run()
+    }
+  }
+
 }
 
 case class InputData(data: String, desc: String) {
@@ -78,3 +84,9 @@ class ParboiledParserRun(protected val inputData: InputData) extends ParserTestR
 
 }
 
+class SimpleParserRun(protected val inputData: InputData) extends ParserTestRun {
+
+  override protected val parseFun : (String) => Seq[Seq[String]] =
+    s => SimpleCsvParser.fromString(s, ',')
+
+}
