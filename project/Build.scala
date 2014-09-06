@@ -15,7 +15,7 @@ object Resolvers {
 object Dependencies {
 
   val combinatorParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
-  val parboiled = "org.parboiled" %% "parboiled" % "2.0.0"
+  val parboiled = "org.parboiled" %% "parboiled" % "2.0.1"
 
   val scalaTest = "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test"
 
