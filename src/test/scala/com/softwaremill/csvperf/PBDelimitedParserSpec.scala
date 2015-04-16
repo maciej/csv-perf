@@ -3,64 +3,40 @@ package com.softwaremill.csvperf
 import org.parboiled2.ParserInput
 import org.scalatest.{FlatSpec, ShouldMatchers}
 
-import scala.util.{Failure, Success}
-
 class PBDelimitedParserSpec extends FlatSpec with ShouldMatchers {
   val MultilineTabSeparatedFile = "a|b|c\nc|c|c"
 
+  def toCsvFile(input: ParserInput, delimiter: Char = ','): CsvFile = PBParser2(input, delimiter).parseThrowing()
+
   it should "parse multiline strings" in {
-    val parser = new PBDelimetedParser(ParserInput(MultilineTabSeparatedFile), "|")
-
-    parser.parsed() match {
-      case Success(result) =>
-        result shouldEqual Vector(Vector("a", "b", "c"), Vector("c", "c", "c"))
-      case Failure(e) => fail(e)
-    }
-
+    toCsvFile(MultilineTabSeparatedFile, '|') shouldEqual
+      CsvFile.fromRecords(Record.fromFields("a", "b", "c"), Record.fromFields("c", "c", "c"))
   }
 
-  it should "not fail when quotes are inside a field" in {
-    // given
-    val line1 = """ala,("ma"),kota"""
-    val line2 = """ala,asdf"ma"asdf,kota"""
+  def firstRowFieldsOf(rawCsv: String) = toCsvFile(rawCsv).records.head.fields
 
-    // when & then
-    new PBDelimetedParser(ParserInput(line1), ",").file.run().get(0) should contain allOf("ala", """("ma")""", "kota")
-    new PBDelimetedParser(ParserInput(line2), ",").file.run().get(0) should contain allOf("ala", """asdf"ma"asdf""", "kota")
+  Seq(
+    ( """ala,("ma"),kota""", Seq("ala", """("ma")""", "kota")),
+    ( """ala,asdf"ma"asdf,kota""", Seq("ala", """asdf"ma"asdf""", "kota"))
+  ).foreach { case (rawCsv, expectedElements) =>
+    it should s"not fail when quotes are inside a field, in: $rawCsv" in {
+      firstRowFieldsOf(rawCsv) shouldEqual expectedElements
+    }
   }
 
   it should "parse line with tabular separator" in {
-    // given
-    val line = "ala\tma\tkota"
-
-    // when
-    val csvLines = new PBDelimetedParser(ParserInput(line), "\t").file.run().get
-
-    // then
-    csvLines should have size 1
-    csvLines(0) should contain allOf("ala", "ma", "kota")
+    toCsvFile("ala\tma\tkota", '\t').shouldEqual(CsvFile.fromRecords(Record.fromFields("ala", "ma", "kota")))
   }
 
   it should "parse line with default separator" in {
-    // given
-    val line = "ala,ma,kota"
-
-    // when
-    val csvLines = new PBDelimetedParser(ParserInput(line), ",").file.run().get
-
-    // then
-    csvLines should have size 1
-    csvLines(0) should contain allOf("ala", "ma", "kota")
+    toCsvFile("ala,ma,kota") shouldEqual CsvFile.fromRecords(Record.fromFields("ala", "ma", "kota"))
   }
 
   it should "correctly parse lines with escaped fields with delimiters" in {
-    val testLine = """"field1","field2","field3 with , before to end","field4""""
+    toCsvFile( """"field1","field2","field3 with , before to end","field4"""").records.head.fields.length shouldEqual 4
+  }
 
-    new PBDelimetedParser(ParserInput(testLine), ",").parsed() match {
-      case Success(result) => println(result)
-        result.head.length shouldEqual 4
-      case Failure(e) => fail(e)
-    }
-
+  it should "correctly parse the example provided by Toby at StackOverflow" in {
+    toCsvFile( """"a,b", "c"""") shouldEqual CsvFile.fromRecords(Record.fromFields("a,b", "c"))
   }
 }
