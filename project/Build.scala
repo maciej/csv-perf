@@ -14,8 +14,8 @@ object Resolvers {
 
 object Dependencies {
 
-  val combinatorParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.1"
-  val parboiled = "org.parboiled" %% "parboiled" % "2.0.1"
+  val combinatorParsers = "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3"
+  val parboiled = "org.parboiled" %% "parboiled" % "2.1.0"
 
   val scalaTest = "org.scalatest" % "scalatest_2.11" % "2.2.0" % "test"
 
@@ -49,7 +49,7 @@ object CSVPerfBuild extends Build {
   override val settings = super.settings ++ Seq(
     name := "csv-perf",
     version := "1.0",
-    scalaVersion := "2.11.1",
+    scalaVersion := "2.11.6",
     scalacOptions in GlobalScope in Compile := scalaOptionsSeq,
     scalacOptions in GlobalScope in Test := scalaOptionsSeq,
     organization := "com.softwaremill.csvperf",
